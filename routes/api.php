@@ -13,6 +13,12 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
+/*Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});*/
+
+Route::namespace('Api')->group(function() {
+    Route::resource('categories', 'CategoryController')->except('create', 'edit');
+    Route::resource('genres', 'GenreController')->except('create', 'edit');
 });
+
