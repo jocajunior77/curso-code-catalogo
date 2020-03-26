@@ -21,5 +21,6 @@ class Category extends Model
         'id' => 'string'
     ];
 
+    protected $incrementing = false;
 
 }

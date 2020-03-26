@@ -21,5 +21,7 @@ class Genre extends Model
         'id' => 'string'
     ];
 
+    protected $incrementing = false;
+
 
 }
