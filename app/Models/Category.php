@@ -17,6 +17,10 @@ class Category extends Model
 
     protected $dates = ['deleted_at'];
 
+    protected  $casts = [
+        'id' => 'string'
+    ];
+
     public static function boot()
     {
         parent::boot();
