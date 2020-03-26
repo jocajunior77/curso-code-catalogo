@@ -58,4 +58,17 @@ class GenreTest extends TestCase
         $this->assertCount(count($dates), $genre->getDates());
     }
 
+    public function testDatabaseCreate()
+    {
+        $UUIDv4 = '/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i';
+        $genre = factory(Genre::class)->create();
+        $this->assertEquals(preg_match($UUIDv4, $genre->id),1);
+    }
+
+    public function testDatabaseDelete()
+    {
+        $genre = factory(Genre::class)->create();
+        $this->assertTrue($genre->delete());
+    }
+
 }
