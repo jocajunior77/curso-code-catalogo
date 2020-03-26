@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Genre extends Model
 {
@@ -12,4 +13,6 @@ class Genre extends Model
     protected $fillable = [
         'name', 'is_active',
     ];
+
+    protected $dates = ['deleted_at'];
 }
