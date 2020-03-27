@@ -25,4 +25,22 @@ class GenreTest extends TestCase
         $genre = factory(Genre::class)->create();
         $this->assertTrue($genre->delete());
     }
+
+    public function testList()
+    {
+        factory(Genre::class)->create();
+        $genre = Genre::all();
+        $this->assertCount(1, $genre);
+        $categoryKeys = array_keys($genre->first()->getAttributes());
+
+        $categoryFields = [
+            'id',
+            'name',
+            'is_active',
+            'created_at',
+            'updated_at',
+            'deleted_at'
+        ];
+        $this->assertEqualsCanonicalizing($categoryFields, $categoryKeys);
+    }
 }
