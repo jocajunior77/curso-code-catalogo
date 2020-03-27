@@ -81,6 +81,62 @@ class CategoryControllerTest extends TestCase
                  ]);
     }
 
+    public function testDelete()
+    {
+        $category = factory(Category::class)->create();
+        $category->refresh();
+        $response = $this->get(route('categories.destroy', [ 'category' => $category->id] ));
+        $response->assertStatus(200);
+    }
+
+
+    public function testStore()
+    {
+
+        $response = $this->json('POST', route('categories.store', [
+            'name'      => 'Teste_' . uniqid()
+        ]));
+
+        $id = $response->json('id');
+        $category = Category::find($id);
+
+        $response->assertStatus(201)
+                 ->assertJson($category->toArray());
+        $this->assertTrue($response->json('is_active'));
+        $this->assertNull($response->json('description'));
+
+
+
+        $response = $this->json('POST', route('categories.store', [
+            'name'          => 'Teste_' . uniqid() ,
+            'description'   => 'description',
+            'is_active'     => rand(1,10) % 2 == 0 ? true : false,
+        ]));
+
+        $id = $response->json('id');
+        $category = Category::find($id);
+
+        $response->assertStatus(201)
+                 ->assertJson($category->toArray());
+
+    }
+
+
+    public function testUpdate()
+    {
+
+        $category = factory(Category::class)->create();
+        $category->refresh();
+        $response = $this->json('PUT', route('categories.update', ['category' => $category->id ]), [
+            'name'      => str_repeat('a', 254),
+            'is_active' => true
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertTrue($response->json('is_active'));
+
+    }
+
 
 
 }
