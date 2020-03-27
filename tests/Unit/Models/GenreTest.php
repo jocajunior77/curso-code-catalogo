@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Models;
 
 use App\Models\Genre;
 use App\Models\Traits\Uuid;
@@ -36,7 +36,7 @@ class GenreTest extends TestCase
     public function testCastsAttribute()
     {
         $genre = new Genre;
-        $casts = ['id' => 'string'];
+        $casts = [ 'id' => 'string' , 'is_active' => 'boolean'];
         $this->assertEquals(
             $casts,
             $genre->getCasts()

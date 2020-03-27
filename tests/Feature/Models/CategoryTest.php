@@ -13,16 +13,18 @@ class CategoryTest extends TestCase
 
     use DatabaseMigrations;
 
-    public function testDatabaseCreate()
+    public function testCreate()
     {
         $UUIDv4 = '/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i';
         $category = factory(Category::class)->create();
+        $category->refresh();
         $this->assertEquals(preg_match($UUIDv4, $category->id),1);
     }
 
-    public function testDatabaseDelete()
+    public function testDelete()
     {
         $category = factory(Category::class)->create();
+        $category->refresh();
         $this->assertTrue($category->delete());
     }
 
@@ -43,5 +45,27 @@ class CategoryTest extends TestCase
             'deleted_at'
         ];
         $this->assertEqualsCanonicalizing($categoryFields, $categoryKeys);
+    }
+
+    public function testUpdate()
+    {
+        $category = factory(Category::class)->create([
+            'description' => 'teste_create',
+            'is_active'   => false
+        ]);
+
+        $data = [
+           'name'        => 'teste_update',
+           'description' => 'teste_update_description',
+           'is_active'   => true
+        ];
+
+        $category->update($data);
+
+        foreach ($data as $key => $value) {
+            $this->assertEquals($value, $category->{$key} );
+        }
+
+
     }
 }
