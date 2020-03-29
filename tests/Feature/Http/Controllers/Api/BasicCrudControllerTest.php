@@ -52,4 +52,20 @@ class BasicCrudControllerTest extends TestCase
 
         $this->controller->store($request);
     }
+
+    public  function testStore()
+    {
+        $request = \Mockery::mock(Request::class);
+        $request->shouldReceive('all')
+                ->once()
+                ->andReturn([
+                    'name'=>'name',
+                    'name'=>'description',
+                ]);
+
+        $obj = $this->controller->store($request);
+
+        $this->assertEquals(CategoryStub::find(1)->toArray(), $obj->toArray());
+    }
 }
+
