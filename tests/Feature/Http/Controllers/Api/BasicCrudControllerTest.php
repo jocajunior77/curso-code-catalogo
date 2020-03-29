@@ -10,15 +10,19 @@ use Tests\Stubs\Models\CategoryStub;
 use Tests\Stubs\Controllers\CategoryControllerStub;
 use Tests\Traits\TestValidations;
 use Tests\Traits\TestSaves;
+use Illuminate\Http\Request;
 
 class BasicCrudControllerTest extends TestCase
 {
+
+    private $controller;
 
     protected function setUp(): void
     {
         parent::setUp();
         CategoryStub::dropTable();
         CategoryStub::createTable();
+        $this->controller = new CategoryControllerStub();
     }
 
     protected function tearDown(): void
@@ -31,9 +35,21 @@ class BasicCrudControllerTest extends TestCase
     {
         $category = CategoryStub::create(['name' => 'name', 'description' => 'description']);
         $category->refresh();
-        $controller = new CategoryControllerStub();
-        $result = $controller->index()->toArray();
+        $result = $this->controller->index()->toArray();
         $this->assertEquals([$category->toArray()], $result);
 
+    }
+
+    /**
+     * @expectedException Illuminate\Validation\ValidationException
+     */
+    public function testInvalidationDataInStore()
+    {
+        $request = \Mockery::mock(Request::class);
+        $request->shouldReceive('all')
+                ->once()
+                ->andReturn(['name'=>'']);
+
+        $this->controller->store($request);
     }
 }
