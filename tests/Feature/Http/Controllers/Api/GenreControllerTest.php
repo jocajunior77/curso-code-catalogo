@@ -9,11 +9,12 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\Traits\TestValidations;
+use Tests\Traits\TestSaves;
 
 class GenreControllerTest extends TestCase
 {
 
-    use DatabaseMigrations, TestValidations;
+    use DatabaseMigrations, TestValidations, TestSaves;
 
     protected $genre;
 
@@ -64,42 +65,25 @@ class GenreControllerTest extends TestCase
     public function testStore()
     {
 
-        $response = $this->json('POST', route('genres.store', [
-            'name'      => 'Teste_' . uniqid()
-        ]));
+        $data = [ 'name' => 'Teste_' . uniqid() ];
+        $this->assertStore($data, $data + [ 'is_active' => true ]);
 
-        $id = $response->json('id');
-        $genre = Genre::find($id);
-
-        $response->assertStatus(201)
-                 ->assertJson($genre->toArray());
-        $this->assertTrue($response->json('is_active'));
-
-
-        $response = $this->json('POST', route('genres.store', [
+        $data = [
             'name'          => 'Teste_' . uniqid() ,
             'is_active'     => rand(1,10) % 2 == 0 ? true : false,
-        ]));
-
-        $id = $response->json('id');
-        $genre = Genre::find($id);
-
-        $response->assertStatus(201)
-                 ->assertJson($genre->toArray());
+        ];
+        $this->assertStore($data, $data);
 
     }
 
     public function testUpdate()
     {
 
-        $this->genre->refresh();
-        $response = $this->json('PUT', route('genres.update', ['genre' => $this->genre->id ]), [
-            'name'      => str_repeat('a', 254),
-            'is_active' => true
-        ]);
-
-        $response->assertStatus(200);
-        $this->assertTrue($response->json('is_active'));
+        $data = [
+            'name'          => 'Teste_' . uniqid() ,
+            'is_active'     => rand(1,10) % 2 == 0 ? true : false,
+        ];
+        $this->assertUpdate($data, $data);
 
     }
 
@@ -111,5 +95,10 @@ class GenreControllerTest extends TestCase
     protected function routeUpdate()
     {
         return route('genres.update' , [ 'genre' => $this->genre->id ]);
+    }
+
+    protected function model()
+    {
+        return Genre::class;
     }
 }

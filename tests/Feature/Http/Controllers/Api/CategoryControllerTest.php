@@ -8,11 +8,12 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\Traits\TestValidations;
+use Tests\Traits\TestSaves;
 
 class CategoryControllerTest extends TestCase
 {
 
-    use DatabaseMigrations, TestValidations;
+    use DatabaseMigrations, TestValidations, TestSaves;
 
     protected $category;
 
@@ -66,31 +67,23 @@ class CategoryControllerTest extends TestCase
     public function testStore()
     {
 
-        $response = $this->json('POST', route('categories.store', [
-            'name'      => 'Teste_' . uniqid()
-        ]));
 
-        $id = $response->json('id');
-        $category = Category::find($id);
+        $data = [ 'name' => 'Teste_' . uniqid() ];
+        $this->assertStore($data, $data + [ 'description' => null, 'is_active' => true ]);
 
-        $response->assertStatus(201)
-                 ->assertJson($category->toArray());
-        $this->assertTrue($response->json('is_active'));
-        $this->assertNull($response->json('description'));
+        $data = [
+            'name'          => 'Teste_' . uniqid(),
+            'description'   => 'description'
+        ];
+        $this->assertStore($data, $data + [ 'is_active' => true ]);
 
 
-
-        $response = $this->json('POST', route('categories.store', [
+        $data = [
             'name'          => 'Teste_' . uniqid() ,
             'description'   => 'description',
             'is_active'     => rand(1,10) % 2 == 0 ? true : false,
-        ]));
-
-        $id = $response->json('id');
-        $category = Category::find($id);
-
-        $response->assertStatus(201)
-                 ->assertJson($category->toArray());
+        ];
+        $this->assertStore($data, $data);
 
     }
 
@@ -98,14 +91,13 @@ class CategoryControllerTest extends TestCase
     public function testUpdate()
     {
 
-        $this->category->refresh();
-        $response = $this->json('PUT', route('categories.update', ['category' => $this->category->id ]), [
-            'name'      => str_repeat('a', 254),
-            'is_active' => true
-        ]);
+        $data = [
+            'name'          => 'Teste_' . uniqid() ,
+            'description'   => 'description',
+            'is_active'     => rand(1,10) % 2 == 0 ? true : false,
+        ];
+        $this->assertUpdate($data, $data);
 
-        $response->assertStatus(200);
-        $this->assertTrue($response->json('is_active'));
 
     }
 
@@ -120,6 +112,10 @@ class CategoryControllerTest extends TestCase
         return route('categories.update' , [ 'category' => $this->category->id ]);
     }
 
+    protected function model()
+    {
+        return Category::class;
+    }
 
 
 }
