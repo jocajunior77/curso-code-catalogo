@@ -69,13 +69,13 @@ class CategoryControllerTest extends TestCase
 
 
         $data = [ 'name' => 'Teste_' . uniqid() ];
-        $this->assertStore($data, $data + [ 'description' => null, 'is_active' => true ]);
+        $this->assertStore($data, $data + [ 'description' => null, 'is_active' => true, 'deleted_at' => null ]);
 
         $data = [
             'name'          => 'Teste_' . uniqid(),
             'description'   => 'description'
         ];
-        $this->assertStore($data, $data + [ 'is_active' => true ]);
+        $this->assertStore($data, $data + [ 'is_active' => true, 'deleted_at' => null ]);
 
 
         $data = [
@@ -83,7 +83,7 @@ class CategoryControllerTest extends TestCase
             'description'   => 'description',
             'is_active'     => rand(1,10) % 2 == 0 ? true : false,
         ];
-        $this->assertStore($data, $data);
+        $this->assertStore($data, $data + ['deleted_at' => null]);
 
     }
 

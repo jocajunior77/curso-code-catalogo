@@ -9,9 +9,9 @@ trait TestSaves
 
 
     protected function assertStore(
-        $sendData,
-        $testData,
-        array $ruleParams = []
+        array $sendData,
+        array $testDatabase,
+        array $testJsonData = null
     ) {
 
         $response = $this->json('POST', $this->routeStore(), $sendData);
@@ -21,14 +21,16 @@ trait TestSaves
 
         $model = $this->model();
         $table = (new $model)->getTable();
-        $this->assertDatabaseHas($table, $testData + [ 'id' => $response->json('id') ]);
+        $this->assertDatabaseHas($table, $testDatabase + [ 'id' => $response->json('id') ]);
+        $this->assertJsonResponseContent($response, $testDatabase, $testJsonData);
+        return $response;
 
     }
 
     protected function assertUpdate(
-        $sendData,
-        $testData,
-        array $ruleParams = []
+        array $sendData,
+        array $testDatabase,
+        array $testJsonData  = null
     ) {
 
         $response = $this->json('PUT', $this->routeUpdate(), $sendData);
@@ -38,8 +40,19 @@ trait TestSaves
 
         $model = $this->model();
         $table = (new $model)->getTable();
-        $this->assertDatabaseHas($table, $testData);
+        $this->assertDatabaseHas($table, $testDatabase);
+        $this->assertJsonResponseContent($response, $testDatabase, $testJsonData);
+        return $response;
 
+    }
+
+    protected function assertJsonResponseContent(
+        $response,
+        $testDatabase,
+        $testJsonData
+    ) {
+        $testResponse = $testJsonData ?? $testDatabase;
+        $response->assertJsonFragment($testResponse);
     }
 
 
