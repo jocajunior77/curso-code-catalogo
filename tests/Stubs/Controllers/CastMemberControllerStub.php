@@ -3,21 +3,21 @@
 namespace Tests\Stubs\Controllers;
 
 use App\Http\Controllers\Api\BasicCrudController;
-use Tests\Stubs\Models\CategoryStub;
+use Tests\Stubs\Models\CastMemberStub;
 use Illuminate\Http\Request;
 
-class CategoryControllerStub extends BasicCrudController
+class CastMemberControllerStub extends BasicCrudController
 {
 
 
     private $rules = [
         'name'          => 'required|max:255',
-        'description'   => 'nullable'
+        'type'          => 'in:1,2'
     ];
 
     protected function model()
     {
-        return CategoryStub::class;
+        return CastMemberStub::class;
     }
 
     public function rulesStore()

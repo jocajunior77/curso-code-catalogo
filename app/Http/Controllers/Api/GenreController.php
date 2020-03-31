@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Genre;
 use Illuminate\Http\Request;
 
-class GenreController extends Controller
+class GenreController extends BasicCrudController
 {
 
     private $rules = [
@@ -14,34 +14,18 @@ class GenreController extends Controller
         'is_active' => 'boolean',
     ];
 
-    public function index()
+    public function model()
     {
-        return Genre::all();
+        return Genre::class;
     }
 
-    public function store(Request $request)
+    protected function rulesStore()
     {
-        $this->validate($request, $this->rules);
-        return Genre::create($request->all())->refresh();
+        return $this->rules;
     }
 
-
-    public function show(Genre $genre)
+    protected function rulesUpdate()
     {
-        return $genre;
-    }
-
-
-    public function update(Request $request, Genre $genre)
-    {
-        $this->validate($request, $this->rules);
-        $genre->update($request->all());
-        return $genre->refresh();
-    }
-
-    public function destroy(Genre $genre)
-    {
-        $genre->delete();
-        return response()->noContent();
+        return $this->rules;
     }
 }

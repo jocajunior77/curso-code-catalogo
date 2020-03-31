@@ -3,21 +3,21 @@
 namespace Tests\Stubs\Controllers;
 
 use App\Http\Controllers\Api\BasicCrudController;
-use Tests\Stubs\Models\CategoryStub;
+use Tests\Stubs\Models\GenreStub;
 use Illuminate\Http\Request;
 
-class CategoryControllerStub extends BasicCrudController
+class GenreControllerStub extends BasicCrudController
 {
 
 
     private $rules = [
         'name'          => 'required|max:255',
-        'description'   => 'nullable'
+        'is_active'     => 'boolean'
     ];
 
     protected function model()
     {
-        return CategoryStub::class;
+        return GenreStub::class;
     }
 
     public function rulesStore()
