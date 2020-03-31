@@ -17,6 +17,7 @@ class CastMember extends Model
 
     protected $fillable = ['name', 'type'];
     protected $dates = ['deleted_at'];
+    protected  $casts = ['id' => 'string'];
     public $incrementing = false;
 
 }

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\Genre;
+use App\Models\CastMember;
 use App\Models\Traits\Uuid;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tests\TestCase;
@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class GenreTest extends TestCase
+class CastMemberUnitTest extends TestCase
 {
 
 
@@ -19,45 +19,45 @@ class GenreTest extends TestCase
         $traits = [
             SoftDeletes::class, Uuid::class
         ];
-        $classTraits = array_keys(class_uses(Genre::class));
+        $classTraits = array_keys(class_uses(CastMember::class));
         $this->assertEquals($traits, $classTraits);
     }
 
     public function testFillableAttribute()
     {
-        $genre = new Genre;
+        $castMember = new CastMember;
         $this->assertEquals(
-            ['name', 'is_active'],
-            $genre->getFillable()
+            ['name', 'type'],
+            $castMember->getFillable()
         );
     }
 
 
     public function testCastsAttribute()
     {
-        $genre = new Genre;
-        $casts = [ 'id' => 'string' , 'is_active' => 'boolean'];
+        $castMember = new CastMember;
+        $casts = [ 'id' => 'string'];
         $this->assertEquals(
             $casts,
-            $genre->getCasts()
+            $castMember->getCasts()
         );
     }
 
     public function testIncrementingAttribute()
     {
-        $genre = new Genre;
-        $this->assertFalse($genre->incrementing);
+        $castMember = new CastMember;
+        $this->assertFalse($castMember->incrementing);
     }
 
 
     public function testDatesAttribute()
     {
-        $genre = new Genre;
+        $castMember = new CastMember;
         $dates = ['deleted_at', 'created_at', 'updated_at'];
         foreach ($dates as $date) {
-            $this->assertContains($date, $genre->getDates());
+            $this->assertContains($date, $castMember->getDates());
         }
-        $this->assertCount(count($dates), $genre->getDates());
+        $this->assertCount(count($dates), $castMember->getDates());
     }
 
 }
