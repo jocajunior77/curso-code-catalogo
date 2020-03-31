@@ -17,7 +17,7 @@ class VideoController extends BasicCrudController
             'title'         => 'required|max:255',
             'description'   => 'required',
             'year_launched' => 'required|date_format:Y',
-            'duraction'     => 'required|numeric',
+            'duraction'     => 'required|integer',
             'rating'        => 'required|in:'.implode(',', Video::RATING_LIST),
             'opened'        => 'boolean'
         ];
