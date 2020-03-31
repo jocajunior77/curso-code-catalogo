@@ -9,10 +9,19 @@ use Illuminate\Http\Request;
 class VideoController extends BasicCrudController
 {
 
-    private $rules = [
-        'title'         => 'required|max:255',
-        'description'   => 'required|max:255'
-    ];
+    private $rules;
+
+    public function __construct()
+    {
+        $this->rules = [
+            'title'         => 'required|max:255',
+            'description'   => 'required',
+            'year_launched' => 'required|date_format:Y',
+            'duraction'     => 'required|numeric',
+            'rating'        => 'required|in:'.implode(',', Video::RATING_LIST),
+            'opened'        => 'boolean'
+        ];
+    }
 
     public function model()
     {

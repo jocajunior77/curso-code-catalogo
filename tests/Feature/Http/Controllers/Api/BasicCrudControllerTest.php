@@ -41,11 +41,10 @@ class BasicCrudControllerTest extends TestCase
 
     }
 
-    /**
-     * @expectedException Illuminate\Validation\ValidationException
-     */
     public function testInvalidationDataInStore()
     {
+
+        $this->expectException('Illuminate\Validation\ValidationException');
         $request = \Mockery::mock(Request::class);
         $request->shouldReceive('all')
                 ->once()
@@ -65,7 +64,6 @@ class BasicCrudControllerTest extends TestCase
                 ]);
 
         $obj = $this->controller->store($request);
-
         $this->assertEquals(CategoryStub::find(1)->toArray(), $obj->toArray());
     }
 
@@ -82,11 +80,9 @@ class BasicCrudControllerTest extends TestCase
     }
 
 
-    /**
-     * @expectedException Illuminate\Database\Eloquent\ModelNotFoundException
-     */
     public function testIfFindOrFailThrowExceptionWhenIdInvalid()
     {
+        $this->expectException('Illuminate\Database\Eloquent\ModelNotFoundException');
         $reflectionClass = new \ReflectionClass(BasicCrudController::class);
         $reflectionMethod = $reflectionClass->getMethod('findOrFail');
         $reflectionMethod->setAccessible(true);

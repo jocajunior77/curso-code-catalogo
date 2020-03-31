@@ -25,10 +25,10 @@ class Video extends Model
     protected $dates = ['deleted_at'];
 
     protected  $casts = [
-        'id' => 'string',
-        'opened' => 'boolean',
+        'id'            => 'string',
+        'opened'        => 'boolean',
         'year_launched' => 'integer',
-        'duraction' => 'integer',
+        'duraction'     => 'integer',
     ];
 
     public $incrementing = false;
