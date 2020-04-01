@@ -46,6 +46,10 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if(\DB::transactionLevel() > 0) {
+            \DB::rollBack();
+            dd('oi');
+        }
         return parent::render($request, $exception);
     }
 }

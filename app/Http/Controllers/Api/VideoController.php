@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 class VideoController extends BasicCrudController
 {
 
+    /**
+     * rollback em caso de erro esta em Exceptions/Handler
+     */
     private $rules;
 
     public function __construct()
@@ -27,6 +30,8 @@ class VideoController extends BasicCrudController
 
     public function store(Request $request)
     {
+
+
         Video::beginTransaction();
         $validateData = $this->validate($request, $this->rulesStore());
         $obj = $this->model()::create($validateData);
