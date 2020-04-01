@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers\Api;
 
 use App\Models\Video;
 use App\Models\Category;
+use App\Models\Genre;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,7 +52,8 @@ class VideoControllerTest extends TestCase
             'description' => '',
             'year_launched' => '',
             'duraction' => '',
-            'categories_id' => ''
+            'categories_id' => '',
+            'genres_id' => ''
         ];
         $this->assertassertInvalidationInSaveAction($data, 'required');
 
@@ -72,6 +74,7 @@ class VideoControllerTest extends TestCase
     {
 
         $category = factory (Category::class)->create();
+        $genre    = factory (Genre::class)->create();
 
 
         $data = [
@@ -84,7 +87,8 @@ class VideoControllerTest extends TestCase
         ];
 
         $data_append = [
-            'categories_id' => [ $category->id ]
+            'categories_id' => [ $category->id ],
+            'genres_id' => [ $genre->id ],
         ];
 
 
@@ -109,6 +113,7 @@ class VideoControllerTest extends TestCase
     {
 
         $category = factory (Category::class)->create();
+        $genre    = factory (Genre::class)->create();
 
 
         $data = [
@@ -121,7 +126,8 @@ class VideoControllerTest extends TestCase
         ];
 
         $data_append = [
-            'categories_id' => [ $category->id ]
+            'categories_id' => [ $category->id ],
+            'genres_id' => [ $genre->id ],
         ];
 
         $this->assertUpdate($data + $data_append, $data);
