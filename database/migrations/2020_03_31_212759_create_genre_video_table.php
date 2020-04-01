@@ -15,9 +15,9 @@ class CreateGenreVideoTable extends Migration
     {
         Schema::create('genre_video', function (Blueprint $table) {
             $table->uuid('genre_id')->index();
-            $table->foreing('genre_id')->references('id')->on('genres');
+            $table->foreign('genre_id')->references('id')->on('genres');
             $table->uuid('video_id')->index();
-            $table->foreing('video_id')->references('id')->on('videos');
+            $table->foreign('video_id')->references('id')->on('videos');
             $table->unique(['genre_id', 'video_id']);
         });
     }
