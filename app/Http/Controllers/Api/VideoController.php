@@ -31,12 +31,10 @@ class VideoController extends BasicCrudController
     public function store(Request $request)
     {
 
-
         Video::beginTransaction();
         $validateData = $this->validate($request, $this->rulesStore());
         $obj = $this->model()::create($validateData);
-        $obj->categories()->sync($request->get('categories_id')); // Remove e cadastra novamente
-        $obj->genres()->sync($request->get('genres_id')); // Remove e cadastra novamente
+        $this->handleRelations($obj, $request);
         Video::commit();
         return $obj->refresh();
     }
@@ -47,11 +45,17 @@ class VideoController extends BasicCrudController
         $obj = $this->findOrFail($id);
         $validateData = $this->validate($request, $this->rulesUpdate());
         $obj->update($validateData);
-        $obj->categories()->sync($request->get('categories_id')); // Remove e cadastra novamente
-        $obj->genres()->sync($request->get('genres_id')); // Remove e cadastra novamente
+        $this->handleRelations($obj, $request);
         Video::commit();
         return $obj->refresh();
     }
+
+
+    protected function handleRelations($video, Request $request) {
+        $video->categories()->sync($request->get('categories_id')); // Remove e cadastra novamente
+        $video->genres()->sync($request->get('genres_id')); // Remove e cadastra novamente
+    }
+
 
     public function model()
     {
