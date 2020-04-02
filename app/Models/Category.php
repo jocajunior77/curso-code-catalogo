@@ -23,4 +23,9 @@ class Category extends BaseModel
 
     public $incrementing = false;
 
+    public function genres()
+    {
+        return $this->belongsToMany(Genre::class);
+    }
+
 }

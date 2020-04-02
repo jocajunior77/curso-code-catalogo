@@ -10,9 +10,32 @@ class GenreController extends BasicCrudController
 {
 
     private $rules = [
-        'name'      => 'required|max:255',
-        'is_active' => 'boolean',
+        'name'          => 'required|max:255',
+        'is_active'     => 'boolean',
+        'categories_id' => 'array|exists:categories,id',
     ];
+
+    public function store(Request $request)
+    {
+
+        Genre::beginTransaction();
+        $validateData = $this->validate($request, $this->rulesStore());
+        $obj = $this->model()::create($validateData);
+        $obj->categories()->sync($request->get('categories_id'));
+        Genre::commit();
+        return $obj->refresh();
+    }
+
+    public function update(Request $request, $id)
+    {
+        Genre::beginTransaction();
+        $obj = $this->findOrFail($id);
+        $validateData = $this->validate($request, $this->rulesUpdate());
+        $obj->update($validateData);
+        $obj->categories()->sync($request->get('categories_id'));
+        Genre::commit();
+        return $obj->refresh();
+    }
 
     public function model()
     {
