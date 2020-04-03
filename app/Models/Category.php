@@ -28,4 +28,9 @@ class Category extends BaseModel
         return $this->belongsToMany(Genre::class);
     }
 
+    public function videos()
+    {
+        return $this->belongsToMany(Videos::class);
+    }
+
 }
