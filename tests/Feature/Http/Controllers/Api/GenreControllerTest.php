@@ -8,8 +8,11 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\Request;
 use Tests\Traits\TestValidations;
 use Tests\Traits\TestSaves;
+use App\Models\Category;
+use App\Http\Controllers\Api\GenreController;
 
 class GenreControllerTest extends TestCase
 {
@@ -17,12 +20,23 @@ class GenreControllerTest extends TestCase
     use DatabaseMigrations, TestValidations, TestSaves;
 
     protected $genre;
+    protected $sendData;
+    protected $appendData;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->genre = factory (Genre::class)->create();
+        $this->genre = factory(Genre::class)->create();
+        $this->sendData = [
+            'name' => 'Teste_' . uniqid() ,
+            'is_active' => false
+        ];
+
+        $this->appendData = [
+            'categories_id' => [ factory(Category::class)->create()->id ]
+        ];
     }
+
 
     public function testIndex()
     {
@@ -44,7 +58,10 @@ class GenreControllerTest extends TestCase
     public function testInvalidData()
     {
 
-        $data = [ 'name' => '' ];
+        $data = [
+            'name' => '',
+            'categories_id' => ''
+        ];
         $this->assertassertInvalidationInSaveAction($data, 'required');
 
         $data = [ 'name' => str_repeat('a', 256) ];
@@ -52,6 +69,12 @@ class GenreControllerTest extends TestCase
 
         $data = [ 'is_active' => 'a' ];
         $this->assertassertInvalidationInSaveAction($data, 'boolean');
+
+        $data = [ 'categories_id' => 'a'];
+        $this->assertassertInvalidationInSaveAction($data, 'array');
+
+        $data = [ 'categories_id' => [100]];
+        $this->assertassertInvalidationInSaveAction($data, 'exists');
 
     }
 
@@ -64,27 +87,36 @@ class GenreControllerTest extends TestCase
 
     public function testStore()
     {
-
-        $data = [ 'name' => 'Teste_' . uniqid() ];
-        $this->assertStore($data, $data + [ 'is_active' => true ]);
-
-        $data = [
-            'name'          => 'Teste_' . uniqid() ,
-            'is_active'     => rand(1,10) % 2 == 0 ? true : false,
-        ];
-        $this->assertStore($data, $data);
-
+       $this->assertStore($this->sendData + $this->appendData, $this->sendData);
     }
 
     public function testUpdate()
     {
+        $this->assertUpdate($this->sendData + $this->appendData, $this->sendData);
+    }
 
-        $data = [
-            'name'          => 'Teste_' . uniqid() ,
-            'is_active'     => rand(1,10) % 2 == 0 ? true : false,
-        ];
-        $this->assertUpdate($data, $data);
+    public function testRollbackStore()
+    {
+        $this->expectExceptionMessage('0');
+        $request = \Mockery::mock(Request::class);
 
+        $controller = \Mockery::mock(GenreController::class)
+            ->makePartial()
+            ->shouldAllowMockingProtectedMethods();
+
+        $controller->shouldReceive('validate')
+           ->withAnyArgs()
+           ->andReturn($this->sendData + $this->appendData);
+
+        $controller->shouldReceive('rulesStore')
+           ->withAnyArgs()
+           ->andReturn([]);
+
+        $controller->shouldReceive('handleRelations')
+                   ->once()
+                   ->andThrow(new \Exception(\DB::transactionLevel()));
+
+        $controller->store($request);
     }
 
     protected function routeStore()

@@ -12,7 +12,7 @@ class GenreController extends BasicCrudController
     private $rules = [
         'name'          => 'required|max:255',
         'is_active'     => 'boolean',
-        'categories_id' => 'array|exists:categories,id',
+        'categories_id' => 'required|array|exists:categories,id,deleted_at,NULL',
     ];
 
     public function store(Request $request)
@@ -21,7 +21,7 @@ class GenreController extends BasicCrudController
         Genre::beginTransaction();
         $validateData = $this->validate($request, $this->rulesStore());
         $obj = $this->model()::create($validateData);
-        $obj->categories()->sync($request->get('categories_id'));
+         $this->handleRelations($obj, $request);
         Genre::commit();
         return $obj->refresh();
     }
@@ -32,9 +32,14 @@ class GenreController extends BasicCrudController
         $obj = $this->findOrFail($id);
         $validateData = $this->validate($request, $this->rulesUpdate());
         $obj->update($validateData);
-        $obj->categories()->sync($request->get('categories_id'));
+        $this->handleRelations($obj, $request);
         Genre::commit();
         return $obj->refresh();
+    }
+
+
+    protected function handleRelations($genre, Request $request) {
+        $genre->categories()->sync($request->get('categories_id'));
     }
 
     public function model()

@@ -9,8 +9,10 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\Request;
 use Tests\Traits\TestValidations;
 use Tests\Traits\TestSaves;
+use App\Http\Controllers\Api\VideoController;
 
 class VideoControllerTest extends TestCase
 {
@@ -23,6 +25,44 @@ class VideoControllerTest extends TestCase
     {
         parent::setUp();
         $this->video = factory (Video::class)->create();
+    }
+
+    protected function sendData($type = null)
+    {
+
+        $data =  [
+            'title'         =>  'Teste_' . uniqid(),
+            'description'   => 'description',
+            'year_launched' => rand(2001,2020),
+            'rating'        => Video::RATING_LIST[array_rand(Video::RATING_LIST)],
+            'opened'        => true,
+            'duraction'     => rand(40,120)
+        ];
+
+        switch ($type) {
+            case '1':
+                return ['title' => '','description' => '','year_launched' => '','duraction' => '','categories_id' => '','genres_id' => ''];
+                break;
+            case '2':
+                $data['opened'] = false;
+                return $data;
+                break;
+        }
+
+        return $data;
+
+    }
+
+    protected function appendSendData()
+    {
+
+        $category = factory (Category::class)->create();
+        $genre    = factory (Genre::class)->create();
+
+        return [
+            'categories_id' => [ $category->id ],
+            'genres_id' => [ $genre->id ],
+        ];
     }
 
 
@@ -47,15 +87,7 @@ class VideoControllerTest extends TestCase
     public function testInvalidData()
     {
 
-        $data = [
-            'title' => '',
-            'description' => '',
-            'year_launched' => '',
-            'duraction' => '',
-            'categories_id' => '',
-            'genres_id' => ''
-        ];
-        $this->assertassertInvalidationInSaveAction($data, 'required');
+        $this->assertassertInvalidationInSaveAction($this->sendData(1), 'required');
 
         $data = [ 'title' => str_repeat('a', 256) ];
         $this->assertassertInvalidationInSaveAction($data, 'max.string', ['max' => 255 ]);
@@ -73,67 +105,45 @@ class VideoControllerTest extends TestCase
     public function testStore()
     {
 
-        $category = factory (Category::class)->create();
-        $genre    = factory (Genre::class)->create();
-
-
-        $data = [
-            'title'         =>  'Teste_' . uniqid(),
-            'description'   => 'description',
-            'year_launched' => rand(2001,2020),
-            'rating'        => Video::RATING_LIST[array_rand(Video::RATING_LIST)],
-            'opened'        => true,
-            'duraction'     => rand(40,120)
-        ];
-
-        $data_append = [
-            'categories_id' => [ $category->id ],
-            'genres_id' => [ $genre->id ],
-        ];
-
-
-        $this->assertStore($data + $data_append, $data + [ 'opened' => true, 'deleted_at' => null ]);
-
-
-        $data = [
-            'title'         => 'Teste_' . uniqid() ,
-            'description'   => 'description',
-            'year_launched' => rand(2001,2020),
-            'rating'        => Video::RATING_LIST[array_rand(Video::RATING_LIST)],
-            'opened'        => false,
-            'duraction'     => rand(40,120)
-        ];
-
-        $this->assertStore($data + $data_append, $data + ['deleted_at' => null]);
+        $data = $this->sendData();
+        $this->assertStore($data + $this->appendSendData(), $data + [ 'opened' => true, 'deleted_at' => null ]);
+        $data = $this->sendData(2);
+        $this->assertStore($data + $this->appendSendData(), $data + ['deleted_at' => null]);
 
     }
 
 
     public function testUpdate()
     {
-
-        $category = factory (Category::class)->create();
-        $genre    = factory (Genre::class)->create();
-
-
-        $data = [
-            'title'             => 'Teste_' . uniqid() ,
-            'description'       => 'description',
-            'opened'            => rand(1,10) % 2 == 0 ? true : false,
-            'rating'            => Video::RATING_LIST[array_rand(Video::RATING_LIST)],
-            'year_launched'     => rand(2001,2020),
-            'duraction'         => rand(40,120)
-        ];
-
-        $data_append = [
-            'categories_id' => [ $category->id ],
-            'genres_id' => [ $genre->id ],
-        ];
-
-        $this->assertUpdate($data + $data_append, $data);
-
-
+        $data = $this->sendData();
+        $this->assertUpdate($data + $this->appendSendData(), $data);
     }
+
+
+    public function testRollbackStore()
+    {
+        $this->expectExceptionMessage('0');
+        $request = \Mockery::mock(Request::class);
+
+        $controller = \Mockery::mock(VideoController::class)
+            ->makePartial()
+            ->shouldAllowMockingProtectedMethods();
+
+        $controller->shouldReceive('validate')
+           ->withAnyArgs()
+           ->andReturn($this->sendData());
+
+        $controller->shouldReceive('rulesStore')
+           ->withAnyArgs()
+           ->andReturn([]);
+
+        $controller->shouldReceive('handleRelations')
+                   ->once()
+                   ->andThrow(new \Exception(\DB::transactionLevel()));
+
+        $controller->store($request);
+    }
+
 
 
     protected function routeStore()
