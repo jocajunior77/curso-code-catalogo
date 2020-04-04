@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Video;
 use Illuminate\Http\Request;
+use App\Rules\GenresHasCategoriesRule;
 
 class VideoController extends BasicCrudController
 {
@@ -24,15 +25,20 @@ class VideoController extends BasicCrudController
             'rating'        => 'required|in:'.implode(',', Video::RATING_LIST),
             'opened'        => 'boolean',
             'categories_id' => 'required|array|exists:categories,id,deleted_at,NULL',
-            'genres_id'     => 'required|array|exists:genres,id,deleted_at,NULL',
+            'genres_id'     => [
+                'required',
+                'array',
+                'exists:genres,id,deleted_at,NULL',
+            ],
         ];
     }
 
     public function store(Request $request)
     {
 
-        Video::beginTransaction();
+        $this->addRuleIfGenreHasCategoriesRule($request);
         $validateData = $this->validate($request, $this->rulesStore());
+        Video::beginTransaction();
         $obj = $this->model()::create($validateData);
         $this->handleRelations($obj, $request);
         Video::commit();
@@ -41,19 +47,27 @@ class VideoController extends BasicCrudController
 
     public function update(Request $request, $id)
     {
-        Video::beginTransaction();
         $obj = $this->findOrFail($id);
+        $this->addRuleIfGenreHasCategoriesRule($request);
         $validateData = $this->validate($request, $this->rulesUpdate());
+        Video::beginTransaction();
         $obj->update($validateData);
         $this->handleRelations($obj, $request);
         Video::commit();
         return $obj->refresh();
     }
 
+    protected function addRuleIfGenreHasCategoriesRule(Request $request)
+    {
+        $categoriesId = $request->get('categories_id');
+        $categoriesId = is_array($categoriesId)? $categoriesId: [];
+        $this->rules['genres_id'][] = new GenresHasCategoriesRule($categoriesId);
+    }
+
 
     protected function handleRelations($video, Request $request) {
-        $video->categories()->sync($request->get('categories_id')); // Remove e cadastra novamente
-        $video->genres()->sync($request->get('genres_id')); // Remove e cadastra novamente
+        $video->categories()->sync($request->get('categories_id'));
+        $video->genres()->sync($request->get('genres_id'));
     }
 
 

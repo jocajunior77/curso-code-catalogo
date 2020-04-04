@@ -59,6 +59,8 @@ class VideoControllerTest extends TestCase
         $category = factory (Category::class)->create();
         $genre    = factory (Genre::class)->create();
 
+        $genre->categories()->attach($category->id);
+
         return [
             'categories_id' => [ $category->id ],
             'genres_id' => [ $genre->id ],
@@ -106,9 +108,10 @@ class VideoControllerTest extends TestCase
     {
 
         $data = $this->sendData();
-        $this->assertStore($data + $this->appendSendData(), $data + [ 'opened' => true, 'deleted_at' => null ]);
+        $appendData = $this->appendSendData();
+        $this->assertStore($data + $appendData, $data + [ 'opened' => true, 'deleted_at' => null ]);
         $data = $this->sendData(2);
-        $this->assertStore($data + $this->appendSendData(), $data + ['deleted_at' => null]);
+        $this->assertStore($data + $appendData, $data + ['deleted_at' => null]);
 
     }
 
@@ -123,7 +126,13 @@ class VideoControllerTest extends TestCase
     public function testRollbackStore()
     {
         $this->expectExceptionMessage('0');
+        $data = $this->sendData();// + $this->appendSendData();
+
         $request = \Mockery::mock(Request::class);
+
+        $request->shouldReceive('get')
+                ->withAnyArgs()
+                ->andReturnNull();
 
         $controller = \Mockery::mock(VideoController::class)
             ->makePartial()
@@ -131,7 +140,7 @@ class VideoControllerTest extends TestCase
 
         $controller->shouldReceive('validate')
            ->withAnyArgs()
-           ->andReturn($this->sendData());
+           ->andReturn($data);
 
         $controller->shouldReceive('rulesStore')
            ->withAnyArgs()
@@ -143,8 +152,6 @@ class VideoControllerTest extends TestCase
 
         $controller->store($request);
     }
-
-
 
     protected function routeStore()
     {
