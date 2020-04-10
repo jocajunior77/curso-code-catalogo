@@ -7,6 +7,7 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Database\QueryException;
 
 class VideoTest extends TestCase
 {
@@ -69,6 +70,56 @@ class VideoTest extends TestCase
             $this->assertEquals($value, $video->{$key} );
         }
 
+
+    }
+
+    public function testRollBackCreate()
+    {
+        $hasError = false;
+        try {
+            Video::create([
+                'title'         =>  'Teste_' . uniqid(),
+                'description'   => 'description',
+                'year_launched' => rand(2001,2020),
+                'rating'        => Video::RATING_LIST[array_rand(Video::RATING_LIST)],
+                'opened'        => true,
+                'duraction'     => rand(40,120),
+                'categories_id' => [0,1,2]
+            ]);
+
+        } catch (QueryException $exception) {
+            $hasError = true;
+            $this->assertCount(0, Video::all());
+        }
+        $this->assertTrue($hasError);
+
+    }
+
+    public function testRollBackUpdate()
+    {
+
+        $video = factory(Video::class)->create();
+        $oldVideo = $video->title;
+
+        $hasError = false;
+        try {
+            $video->update([
+                'title'         =>  'Teste_' . uniqid(),
+                'description'   => 'description',
+                'year_launched' => rand(2001,2020),
+                'rating'        => Video::RATING_LIST[array_rand(Video::RATING_LIST)],
+                'opened'        => true,
+                'duraction'     => rand(40,120),
+                'categories_id' => [0,1,2]
+            ]);
+
+        } catch (QueryException $exception) {
+            $hasError = true;
+            $this->assertDatabaseHas('videos', [
+                'title' => $oldVideo
+            ]);
+        }
+        $this->assertTrue($hasError);
 
     }
 }

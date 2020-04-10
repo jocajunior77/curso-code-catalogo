@@ -32,6 +32,45 @@ class Video extends BaseModel
 
     public $incrementing = false;
 
+
+    public static function create(array $attributes = [])
+    {
+        try {
+            Video::beginTransaction();
+            $obj = static::query()->create($attributes);
+            Video::handleRelations($obj, $attributes);
+            //uploads aqui
+            Video::commit();
+            return $obj;
+        } catch (\Exception $e) {
+            if(isset($obj)) {
+                //excluir os arquivos de uploads
+            }
+            Video::rollBack();
+            throw $e;
+        }
+    }
+
+
+    public function update(array $attributes = [], array $options = [])
+    {
+        try {
+            Video::beginTransaction();
+            $saved = parent::update($attributes, $options);
+            Video::handleRelations($this, $attributes);
+            if($saved) {
+                //uploads aqui
+                //excluir os arquivos antigos
+            }
+            Video::commit();
+            return $saved;
+        } catch (\Exception $e) {
+            //excluir os arquivos de uploads
+            Video::rollBack();
+            throw $e;
+        }
+    }
+
     public function categories()
     {
         return $this->belongsToMany(Category::class)->withTrashed();
@@ -40,5 +79,15 @@ class Video extends BaseModel
     public function genres()
     {
         return $this->belongsToMany(Genre::class)->withTrashed();
+    }
+
+    public static function handleRelations(Video $video, array $attributes) {
+
+        if(isset($attributes['categories_id'])) {
+            $video->categories()->sync($attributes['categories_id']);
+        }
+        if(isset($attributes['genres_id'])) {
+            $video->genres()->sync($attributes['genres_id']);
+        }
     }
 }
