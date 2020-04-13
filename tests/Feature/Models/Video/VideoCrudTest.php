@@ -1,18 +1,15 @@
 <?php
 
-namespace Tests\Feature\Models;
+namespace Tests\Feature\Models\Video;
 
 use App\Models\Video;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Database\QueryException;
 
-class VideoTest extends TestCase
-{
 
-    use DatabaseMigrations;
+class VideoCrudTest extends BaseVideoTestCase
+{
 
     public function testCreate()
     {
@@ -44,6 +41,7 @@ class VideoTest extends TestCase
             'duraction',
             'rating',
             'year_launched',
+            'video_file',
             'created_at',
             'updated_at',
             'deleted_at'
@@ -77,15 +75,7 @@ class VideoTest extends TestCase
     {
         $hasError = false;
         try {
-            Video::create([
-                'title'         =>  'Teste_' . uniqid(),
-                'description'   => 'description',
-                'year_launched' => rand(2001,2020),
-                'rating'        => Video::RATING_LIST[array_rand(Video::RATING_LIST)],
-                'opened'        => true,
-                'duraction'     => rand(40,120),
-                'categories_id' => [0,1,2]
-            ]);
+            Video::create($this->data + [ 'categories_id' => [0,1,2]]);
 
         } catch (QueryException $exception) {
             $hasError = true;
@@ -103,16 +93,7 @@ class VideoTest extends TestCase
 
         $hasError = false;
         try {
-            $video->update([
-                'title'         =>  'Teste_' . uniqid(),
-                'description'   => 'description',
-                'year_launched' => rand(2001,2020),
-                'rating'        => Video::RATING_LIST[array_rand(Video::RATING_LIST)],
-                'opened'        => true,
-                'duraction'     => rand(40,120),
-                'categories_id' => [0,1,2]
-            ]);
-
+            $video->update($this->data + [ 'categories_id' => [0,1,2]]);
         } catch (QueryException $exception) {
             $hasError = true;
             $this->assertDatabaseHas('videos', [
@@ -122,4 +103,5 @@ class VideoTest extends TestCase
         $this->assertTrue($hasError);
 
     }
+
 }

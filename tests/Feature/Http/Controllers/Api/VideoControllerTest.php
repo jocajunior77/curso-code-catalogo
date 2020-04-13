@@ -9,15 +9,17 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Tests\Traits\TestValidations;
 use Tests\Traits\TestSaves;
+use Tests\Traits\TestUploads;
 use App\Http\Controllers\Api\VideoController;
 
 class VideoControllerTest extends TestCase
 {
 
-    use DatabaseMigrations, TestValidations, TestSaves;
+    use DatabaseMigrations, TestValidations, TestSaves, TestUploads;
 
     protected $video;
 
@@ -120,6 +122,61 @@ class VideoControllerTest extends TestCase
     {
         $data = $this->sendData();
         $this->assertUpdate($data + $this->appendSendData(), $data);
+    }
+
+
+    public function testStoreWithFiles()
+    {
+        \Storage::fake();
+        $files = $this->getFiles();
+
+        $sendData = $this->sendData() +
+                    $this->appendSendData() +
+                    $files;
+
+        $response = $this->json('POST', $this->routeStore(), $sendData);
+        $response->assertStatus(201);
+        $id = $response->json('id');
+        foreach ($files as $file) {
+            \Storage::assertExists("{$id}/{$file->hashName()}");
+        }
+
+    }
+
+    public function testUpdateWithFiles()
+    {
+        \Storage::fake();
+        $files = $this->getFiles();
+
+        $sendData = $this->sendData() +
+                    $this->appendSendData() +
+                    $files;
+
+        $response = $this->json('PUT', $this->routeUpdate(), $sendData);
+        $response->assertStatus(200);
+        $id = $response->json('id');
+        foreach ($files as $file) {
+           \Storage::assertExists("{$id}/{$file->hashName()}");
+        }
+
+    }
+
+    public function testInvalidationFile()
+    {
+        $this->assertInvalidationFile(
+            'video_file',
+            'mp4',
+            12,
+            'mimetypes',
+            ['values' => 'video/mp4']
+        );
+    }
+
+    protected function getFiles()
+    {
+        return [
+            'video_file' => UploadedFile::fake()->create('video_file.mp4')
+        ];
     }
 
 

@@ -4,6 +4,7 @@ namespace Tests\Unit\Models;
 
 use App\Models\Video;
 use App\Models\Traits\Uuid;
+use App\Models\Traits\UploadFiles;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -17,7 +18,7 @@ class VideoUnitTest extends TestCase
     public function testIfUseTrait()
     {
         $traits = [
-            SoftDeletes::class, Uuid::class
+            SoftDeletes::class, Uuid::class, UploadFiles::class
         ];
         $classTraits = array_keys(class_uses(Video::class));
         $this->assertEquals($traits, $classTraits);

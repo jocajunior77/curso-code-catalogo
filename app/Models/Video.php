@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\Uuid;
+use App\Models\Traits\UploadFiles;
 
 class Video extends BaseModel
 {
 
-    use SoftDeletes, Uuid;
+    use SoftDeletes, Uuid, UploadFiles;
 
     const RATING_LIST = ['L','10','12','14','16','18'];
 
@@ -31,20 +32,21 @@ class Video extends BaseModel
     ];
 
     public $incrementing = false;
-
+    public static $fileFields = ['video_file', 'banner', 'trailer'];
 
     public static function create(array $attributes = [])
     {
+        $files = self::extractFiles($attributes);
         try {
             Video::beginTransaction();
             $obj = static::query()->create($attributes);
             Video::handleRelations($obj, $attributes);
-            //uploads aqui
+            $obj->uploadFiles($files);
             Video::commit();
             return $obj;
         } catch (\Exception $e) {
             if(isset($obj)) {
-                //excluir os arquivos de uploads
+                $obj->deleteFiles($files);
             }
             Video::rollBack();
             throw $e;
@@ -54,18 +56,19 @@ class Video extends BaseModel
 
     public function update(array $attributes = [], array $options = [])
     {
+        $files = self::extractFiles($attributes);
         try {
             Video::beginTransaction();
             $saved = parent::update($attributes, $options);
             Video::handleRelations($this, $attributes);
             if($saved) {
-                //uploads aqui
+                $this->uploadFiles($files);
                 //excluir os arquivos antigos
             }
             Video::commit();
             return $saved;
         } catch (\Exception $e) {
-            //excluir os arquivos de uploads
+            $this->deleteFiles($files);
             Video::rollBack();
             throw $e;
         }
@@ -89,5 +92,10 @@ class Video extends BaseModel
         if(isset($attributes['genres_id'])) {
             $video->genres()->sync($attributes['genres_id']);
         }
+    }
+
+    protected function uploadDir()
+    {
+        return $this->id;
     }
 }
