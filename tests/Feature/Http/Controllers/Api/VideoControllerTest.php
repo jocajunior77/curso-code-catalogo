@@ -166,7 +166,7 @@ class VideoControllerTest extends TestCase
         $this->assertInvalidationFile(
             'video_file',
             'mp4',
-            12,
+            240,
             'mimetypes',
             ['values' => 'video/mp4']
         );
