@@ -117,7 +117,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $this->assertInvalidationFile(
             'video_file',
             'mp4',
-            240,
+            51200000,
             'mimetypes',
             ['values' => 'video/mp4']
         );

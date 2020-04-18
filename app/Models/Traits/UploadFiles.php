@@ -2,13 +2,31 @@
 
 namespace App\Models\Traits;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 
 
 trait UploadFiles
 {
 
+    public $oldFiles = [];
+
     public abstract function uploadDir();
+
+    public static function bootUploadFiles()
+    {
+        static::updating(function(Model $model) {
+            $fieldUpdated = array_keys($model->getDirty());
+            $filesUpdated = array_intersect($fieldUpdated, self::$fileFields);
+            $filesFiltered = Arr::where($filesUpdated, function($fileField) use($model) {
+                return $model->getOriginal($fileField);
+            });
+            $model->oldFiles = array_map(function($fileField) use ($model) {
+                return $model->getOriginal($fileField);
+            }, $filesFiltered);
+        });
+    }
 
     public function uploadFiles(array $files)
     {
@@ -27,6 +45,12 @@ trait UploadFiles
         foreach ($files as $file) {
             $this->deleteFile($file);
         }
+    }
+
+
+    public function deleteOldFiles()
+    {
+        $this->deleteFiles($this->oldFiles);
     }
 
 

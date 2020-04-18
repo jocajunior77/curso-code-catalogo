@@ -19,7 +19,11 @@ class Video extends BaseModel
         'year_launched',
         'opened',
         'rating',
-        'duraction'
+        'duraction',
+        'video_file',
+        'thumb_file',
+        'banner_file',
+        'trailler_file'
     ];
 
     protected $dates = ['deleted_at'];
@@ -32,7 +36,7 @@ class Video extends BaseModel
     ];
 
     public $incrementing = false;
-    public static $fileFields = ['video_file', 'banner', 'trailer'];
+    public static $fileFields = ['video_file', 'thumb_file', 'banner_file', 'trailer_file'];
 
     public static function create(array $attributes = [])
     {
@@ -63,9 +67,11 @@ class Video extends BaseModel
             Video::handleRelations($this, $attributes);
             if($saved) {
                 $this->uploadFiles($files);
-                //excluir os arquivos antigos
             }
             Video::commit();
+            if($saved && count($files)) {
+                $this->deleteOldFiles();
+            }
             return $saved;
         } catch (\Exception $e) {
             $this->deleteFiles($files);

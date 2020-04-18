@@ -41,7 +41,10 @@ class VideoCrudTest extends BaseVideoTestCase
             'duraction',
             'rating',
             'year_launched',
+            'thumb_file',
+            'banner_file',
             'video_file',
+            'trailer_file',
             'created_at',
             'updated_at',
             'deleted_at'
