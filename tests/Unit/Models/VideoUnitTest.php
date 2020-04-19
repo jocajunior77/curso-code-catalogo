@@ -33,7 +33,11 @@ class VideoUnitTest extends TestCase
                 'year_launched',
                 'opened',
                 'rating',
-                'duraction'
+                'duraction',
+                'video_file',
+                'thumb_file',
+                'banner_file',
+                'trailler_file'
             ], $category->getFillable()
         );
     }

@@ -1,8 +1,25 @@
 steps:
 
+- id: "Gerando credenciais gcs"
+  name: 'gcr.io/cloud-builders/gcloud'
+  args:
+    - kms
+    - decrypt
+    - --ciphertext-file=./storage/credencials/google/projeto-code-c1137675586f.json.enc
+    - --plaintext-file=./storage/credencials/google/projeto-code-c1137675586f.json
+    - --location=global
+    - --keyring=testing-lesson
+    - --key=projeto-code
+
 - id: "Docker-compose - Executando"
   name: 'gcr.io/$PROJECT_ID/docker-compose'
   args: ['-f','docker-compose.prod.yaml','up','-d']
+  env:
+    - GOOGLE_CLOUD_PROJECT_ID=$PROJECT_ID
+    - GOOGLE_CLOUD_KEY_FILE=projeto-code-c1137675586f.json
+    - GOOGLE_CLOUD_STORAGE_BUCKET=curso-code-micro-videos
+    - GOOGLE_CLOUD_STORAGE_API_URI=https://storage.cloud.google.com/curso-code-micro-videos
+    - TESTING_PROD=true
 
 - id: "Dockerc ps - Executando"
   name: 'gcr.io/cloud-builders/docker'

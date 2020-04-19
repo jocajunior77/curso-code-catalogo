@@ -21,6 +21,10 @@ class VideoStub extends Model
             $table->boolean('opened')->default(false);
             $table->string('rating',3);
             $table->smallInteger('duraction');
+            $table->string('video_file',);
+            $table->string('thumb_file',);
+            $table->string('banner_file',);
+            $table->string('trailler_file');
             $table->softDeletes();
             $table->timestamps();
         });
