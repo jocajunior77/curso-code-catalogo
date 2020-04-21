@@ -9,7 +9,6 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Tests\Traits\TestValidations;
 use Tests\Traits\TestSaves;
@@ -112,25 +111,6 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
 
     }
 
-    public function testInvalidationFile()
-    {
-        $this->assertInvalidationFile(
-            'video_file',
-            'mp4',
-            51200000,
-            'mimetypes',
-            ['values' => 'video/mp4']
-        );
-    }
-
-    protected function getFiles()
-    {
-        return [
-            'video_file' => UploadedFile::fake()->create('video_file.mp4')
-        ];
-    }
-
-
     // public function testRollbackStore()
     // {
     //     $this->expectExceptionMessage('0');
@@ -160,21 +140,5 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
 
     //     $controller->store($request);
     // }
-
-    protected function routeStore()
-    {
-        return route('videos.store');
-    }
-
-    protected function routeUpdate()
-    {
-        return route('videos.update' , [ 'video' => $this->video->id ]);
-    }
-
-    protected function model()
-    {
-        return Video::class;
-    }
-
 
 }
