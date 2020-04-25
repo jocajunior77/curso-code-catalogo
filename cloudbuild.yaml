@@ -1,15 +1,15 @@
 steps:
 
-# - id: "Gerando credenciais gcs"
-#   name: 'gcr.io/cloud-builders/gcloud'
-#   args:
-#     - kms
-#     - decrypt
-#     - --ciphertext-file=./storage/credencials/google/projeto-code-c1137675586f.json.enc
-#     - --plaintext-file=./storage/credencials/google/projeto-code-c1137675586f.json
-#     - --location=global
-#     - --keyring=testing-lesson
-#     - --key=projeto-code
+ - id: "Gerando credenciais gcs"
+   name: 'gcr.io/cloud-builders/gcloud'
+   args:
+     - kms
+     - decrypt
+     - --ciphertext-file=./storage/credencials/google/service-accout-storage.json.enc
+     - --plaintext-file=./storage/credencials/google/projeto-code-c1137675586f.json
+     - --location=global
+     - --keyring=testing-lesson
+     - --key=projeto-code
 
 - id: "Docker-compose - Executando"
   name: 'gcr.io/$PROJECT_ID/docker-compose'
