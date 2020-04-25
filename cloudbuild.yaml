@@ -5,11 +5,11 @@ steps:
    args:
      - kms
      - decrypt
-     - --ciphertext-file=./storage/credencials/google/service-accout-storage.json.enc
-     - --plaintext-file=./storage/credencials/google/projeto-code-c1137675586f.json
+     - --ciphertext-file=./storage/credentials/google/service-account-storage.json.enc
+     - --plaintext-file=./storage/credentials/google/projeto-code-c1137675586f.json
      - --location=global
-     - --keyring=testing-lesson
-     - --key=projeto-code
+     - --key=service-account
+     - --keyring=key-curso-code
 
 - id: "Docker-compose - Executando"
   name: 'gcr.io/$PROJECT_ID/docker-compose'
