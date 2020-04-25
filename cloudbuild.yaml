@@ -1,6 +1,5 @@
 steps:
-
- - id: "Gerando credenciais gcs"
+- id: "Gerando credenciais gcs"
     name: 'gcr.io/cloud-builders/gcloud'
     args:
       - kms
