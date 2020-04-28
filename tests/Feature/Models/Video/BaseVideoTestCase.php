@@ -13,10 +13,12 @@ abstract class BaseVideoTestCase extends TestCase
     use DatabaseMigrations;
 
     protected $data;
+    protected $fileFieldsData = [];
 
     protected function setUp(): void
     {
         parent::setUp();
+
 
         $this->data =  [
             'title'         =>  'Teste_' . uniqid(),
@@ -26,6 +28,10 @@ abstract class BaseVideoTestCase extends TestCase
             'opened'        => true,
             'duraction'     => rand(40,120)
         ];
+
+        foreach (Video::$fileFields as $field){
+            $this->fileFieldsData[$field] = "{$field}.test";
+        }
     }
 
 }
