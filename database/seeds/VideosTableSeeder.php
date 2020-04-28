@@ -1,31 +1,84 @@
 <?php
 
-use Illuminate\Database\Seeder;
 use App\Models\Video;
-use App\Models\Genre;
-use App\Models\Category;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Seeder;
 
 class VideosTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
+    private $allGenres = [];
+    private $relations = [
+        'categories_id' => [],
+        'genres_id' => []
+    ];
     public function run()
     {
-        $genres = Genre::all();
-        factory(Video::class, 100)
-            ->create()
-            ->each(function(Video $video) use ($genres) {
-                $subGenres = $genres->random(5)->load('categories');
-                $categoriesId = [];
-                foreach ($subGenres as $genre) {
-                    array_push($categoriesId, ...$genre->categories->pluck('id')->toArray());
-                }
-                $categoriesId = array_unique($categoriesId);
-                $video->genres()->attach($subGenres->pluck('id')->toArray());
-                $video->categories()->attach($categoriesId);
+
+        $dir = \Storage::getDriver()->getAdapter()->getPathPrefix();
+        \File::deleteDirectory($dir, true);
+
+        $self = $this;
+
+        $this->allGenres = \App\Models\Genre::all();
+        $this->allCastMembers = \App\Models\CastMember::all();
+
+        //permite o mass assigment
+        Model::reguard();
+
+        factory(Video::class, 50)
+            ->make()
+            ->each(function (Video $video) use ($self) {
+                $self->fetchRelations();
+
+                Video::create(
+                    array_merge(
+                        $video->toArray(),
+                        [
+                            'thumb_file' => $self->getImageFile(),
+                            'banner_file' => $self->getImageFile(),
+                            'trailer_file' => $self->getVideoFile(),
+                            'video_file' => $self->getVideoFile(),
+                        ],
+                        $this->relations
+                    )
+                );
+
             });
+
+        Model::unguard();
     }
+
+    protected function fetchRelations()
+    {
+        $subGenres = $this->allGenres->random(2)->load('categories');
+        $categoriesId = [];
+
+        foreach ($subGenres as $genre){
+            array_push($categoriesId, ...$genre->categories->pluck('id')->toArray());
+        }
+
+        $categoriesId = array_unique($categoriesId);
+
+        $genresId = $subGenres->pluck('id')->toArray();
+        $this->relations['categories_id'] = $categoriesId;
+        $this->relations['genres_id'] = $genresId;
+
+    }
+
+    protected function getImageFile()
+    {
+        return new \Illuminate\Http\UploadedFile(
+            storage_path("faker/thumbs/laravel.png"),
+            'laravel.png'
+        );
+    }
+
+    protected function getVideoFile()
+    {
+        return new \Illuminate\Http\UploadedFile(
+            storage_path("faker/videos/fake.mp4"),
+            'fake.mp4'
+        );
+    }
+
 }
